@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxPal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="overlay">
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Record New Income</h2>
+                    <p>Add details about your income to track your finances better.</p>
+                </div>
+
+                <button class="close-btn">&times;</button>
+            </div>
+
+            <form>
+
+                <h3>Add Income</h3>
+
+                <div class="row">
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" placeholder="e.g. Web Design Project">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" placeholder="$0.00">
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group">
+                        <label>Category</label>
+
+                        <select>
+                            <option>Select a category</option>
+                            <option>Salary</option>
+                            <option>Freelancing</option>
+                            <option>Business</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea rows="4" placeholder="Add any additional details..."></textarea>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" class="cancel">Cancel</button>
+                    <button type="submit" class="save">Save</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
