@@ -194,9 +194,84 @@ const deleteTaxEstimate = async (req, res) => {
     }
 };
 
+// ==============================
+// Get Tax Calendar
+// ==============================
+// Returns the quarterly advance-tax schedule
+// for the current financial year.
+// these dates are rule-based calendar data.
+// ==============================
+const getTaxCalendar = async (req, res) => {
+    try {
+        const currentDate = new Date();
+
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = currentDate.getFullYear();
+
+        // Indian financial year:
+        // April - March
+        let startYear;
+
+        if (currentMonth >= 4) {
+            startYear = currentYear;
+        } else {
+            startYear = currentYear - 1;
+        }
+
+        const endYear = startYear + 1;
+
+        const taxYear = `${startYear}-${String(endYear).slice(-2)}`;
+
+        const calendar = [
+            {
+                quarter: "Q1",
+                title: "1st Advance Tax Installment",
+                dueDate: `${startYear}-06-15`,
+                percentage: 15,
+            },
+            {
+                quarter: "Q2",
+                title: "2nd Advance Tax Installment",
+                dueDate: `${startYear}-09-15`,
+                percentage: 45,
+            },
+            {
+                quarter: "Q3",
+                title: "3rd Advance Tax Installment",
+                dueDate: `${startYear}-12-15`,
+                percentage: 75,
+            },
+            {
+                quarter: "Q4",
+                title: "4th Advance Tax Installment",
+                dueDate: `${endYear}-03-15`,
+                percentage: 100,
+            },
+        ];
+
+        return res.status(200).json({
+            success: true,
+            taxYear,
+            calendar,
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to generate tax calendar",
+        });
+    }
+};
+
+// ==============================
+// Export Controllers
+// ==============================
 module.exports = {
     createTaxEstimate,
     getAllTaxEstimates,
     getTaxEstimateById,
     deleteTaxEstimate,
+    getTaxCalendar,
 };

@@ -7,9 +7,13 @@ const {
   getAllTaxEstimates,
   getTaxEstimateById,
   deleteTaxEstimate,
+  getTaxCalendar,
 } = require("../controllers/tax.controller");
 
 const authMiddleware = require("../middleware/auth.middleware");
+
+// Tax Calendar
+router.get("/calendar", authMiddleware, getTaxCalendar);
 
 // Create & Calculate Tax
 router.post("/", authMiddleware, createTaxEstimate);

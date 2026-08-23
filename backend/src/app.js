@@ -41,7 +41,6 @@ const taxRoutes = require("./routes/tax.routes");
 const reportRoutes = require("./routes/report.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const exportRoutes = require("./routes/export.routes");
-const calendarRoutes = require("./routes/calendar.routes");
 
 const errorHandler = require("./middleware/error.middleware");
 
@@ -54,7 +53,6 @@ app.use("/api/tax-estimates", taxRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/export", exportRoutes);
-app.use("/api/calendar", calendarRoutes);
 
 
 // =======================================================
