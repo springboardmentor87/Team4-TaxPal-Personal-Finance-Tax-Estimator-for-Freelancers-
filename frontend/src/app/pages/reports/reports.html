@@ -1,257 +1,1098 @@
 <div class="reports-container">
+
   <app-sidebar></app-sidebar>
-<div class="reports-page">
-  <div class="page-header">
-    <h1>Financial Reports</h1>
-    <p>Generate and download your financial reports</p>
-  </div>
 
-  <div class="content-wrapper reports-page">
-    <div class="page-header">
-      <h1>Financial Reports</h1>
-      <p>Generate and download your financial reports</p>
-    </div>
+  <div class="content-wrapper">
 
-    <div class="message success-message" *ngIf="successMessage">
-      {{ successMessage }}
-    </div>
+    <div class="reports-page">
 
-    <div class="message error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1>Financial Reports</h1>
+        <p>Generate and view your financial reports</p>
+      </div>
 
-    <!-- Generate Report Section -->
-    <div class="reports-card generate-card">
-      <h2>Generate Report</h2>
-      <form [formGroup]="reportForm" (ngSubmit)="generateReport()" class="reports-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="type">Report Type</label>
-            <select id="type" formControlName="type">
-              <option *ngFor="let type of reportTypes" [value]="type">{{ type }}</option>
-            </select>
+      <!-- Messages -->
+      <div
+        class="message success-message"
+        *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <div
+        class="message error-message"
+        *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- ============================== -->
+      <!-- Generate Report -->
+      <!-- ============================== -->
+
+      <div class="reports-card generate-card">
+
+        <h2>Generate Report</h2>
+
+        <form
+          [formGroup]="reportForm"
+          (ngSubmit)="generateReport()"
+          class="reports-form">
+
+          <div class="form-grid">
+
+            <!-- Report Type -->
+            <div class="form-group">
+
+              <label for="type">
+                Report Type
+              </label>
+
+              <select
+                id="type"
+                formControlName="type">
+
+                <option
+                  *ngFor="let type of reportTypes"
+                  [value]="type">
+                  {{ type }}
+                </option>
+
+              </select>
+
+            </div>
+
+            <!-- Month -->
+            <div
+              class="form-group"
+              *ngIf="
+                reportForm.get('type')?.value === 'Monthly Report'
+              ">
+
+              <label for="month">
+                Month
+              </label>
+
+              <select
+                id="month"
+                formControlName="month">
+
+                <option
+                  *ngFor="let month of months"
+                  [value]="month.value">
+                  {{ month.name }}
+                </option>
+
+              </select>
+
+            </div>
+
+            <!-- Quarter -->
+            <div
+              class="form-group"
+              *ngIf="
+                reportForm.get('type')?.value === 'Quarterly Report'
+              ">
+
+              <label for="quarter">
+                Quarter
+              </label>
+
+              <select
+                id="quarter"
+                formControlName="quarter">
+
+                <option [value]="1">
+                  Q1 (January - March)
+                </option>
+
+                <option [value]="2">
+                  Q2 (April - June)
+                </option>
+
+                <option [value]="3">
+                  Q3 (July - September)
+                </option>
+
+                <option [value]="4">
+                  Q4 (October - December)
+                </option>
+
+              </select>
+
+            </div>
+
+            <!-- Year -->
+            <div
+              class="form-group"
+              *ngIf="
+                reportForm.get('type')?.value !== 'Summary Report'
+              ">
+
+              <label for="year">
+                Year
+              </label>
+
+              <select
+                id="year"
+                formControlName="year">
+
+                <option
+                  *ngFor="let year of years"
+                  [value]="year">
+                  {{ year }}
+                </option>
+
+              </select>
+
+            </div>
+
           </div>
 
-          <div class="form-group">
-            <label for="period">Period</label>
-            <select id="period" formControlName="period">
-              <option *ngFor="let period of periods" [value]="period">{{ period }}</option>
-            </select>
+          <div class="form-actions right-align">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="resetForm()">
+
+              Reset
+
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="isLoading">
+
+              {{ isLoading ? 'Generating...' : 'Generate Report' }}
+
+            </button>
+
           </div>
 
-          <div class="form-group">
-            <label for="format">Format</label>
-            <select id="format" formControlName="format">
-              <option *ngFor="let format of formats" [value]="format">{{ format }}</option>
-            </select>
-          </div>
+        </form>
 
-          <div class="form-group" *ngIf="reportForm.get('period')?.value === 'Custom Period'">
-            <label for="customStartDate">Start Date</label>
-            <input type="date" id="customStartDate" formControlName="customStartDate">
-          </div>
+      </div>
 
-          <div class="form-group" *ngIf="reportForm.get('period')?.value === 'Custom Period'">
-            <label for="customEndDate">End Date</label>
-            <input type="date" id="customEndDate" formControlName="customEndDate">
-          </div>
-        </div>
 
-        <div class="form-actions right-align mt-4">
-          <button type="button" class="secondary-button" (click)="resetForm()">Reset</button>
-          <button type="submit" class="primary-button" [disabled]="isGenerating || reportForm.invalid">
-            {{ isGenerating ? 'Generating...' : 'Generate Report' }}
+      <!-- ============================== -->
+      <!-- Export Reports -->
+      <!-- ============================== -->
+
+      <div class="reports-card">
+
+        <h2>Export Reports</h2>
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="downloadPDF()"
+            [disabled]="isDownloadingPDF">
+
+            {{ isDownloadingPDF ? 'Downloading...' : 'Download PDF' }}
+
           </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="downloadCSV()"
+            [disabled]="isDownloadingCSV">
+
+            {{ isDownloadingCSV ? 'Downloading...' : 'Download CSV' }}
+
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="printReport()">
+
+            Print
+
+          </button>
+
         </div>
-      </form>
-    </div>
 
-    <!-- Recent Reports Section -->
-    <div class="reports-card recent-reports-card mt-4">
-      <h2>Recent Reports</h2>
-      <div *ngIf="isLoadingReports" class="loading-state">Loading reports...</div>
-    
-      <div class="table-wrapper" *ngIf="!isLoadingReports && reports.length > 0">
-        <table class="reports-table">
-          <thead>
-            <tr>
-              <th>Report Name</th>
-              <th>Generated</th>
-              <th>Period</th>
-              <th>Format</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let report of reports; trackBy: trackReport" (click)="selectReport(report)" [class.selected]="selectedReport?._id === report._id">
-              <td><strong>{{ report.name }}</strong></td>
-              <td>{{ report.createdAt | date:'MMM d, y, h:mm a' }}</td>
-              <td>{{ report.period }}</td>
-              <td>{{ report.format }}</td>
-              <td>
-                <button class="delete-button small" (click)="deleteReport(report, $event)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
 
-      <div class="empty-state" *ngIf="!isLoadingReports && reports.length === 0">
-        <p>No reports generated yet.</p>
-      </div>
-    </div>
 
-    <!-- Report Preview Section -->
-    <div class="reports-card preview-card mt-4">
-      <div class="preview-header">
-        <h2>Report Preview</h2>
-        <div class="preview-actions" *ngIf="selectedReport">
-          <button type="button" class="secondary-button" (click)="printReport()">Print</button>
-          <button type="button" class="primary-button" (click)="downloadReport()">Download</button>
-        </div>
+      <!-- ============================== -->
+      <!-- Loading -->
+      <!-- ============================== -->
+
+      <div
+        class="loading-state"
+        *ngIf="isLoading">
+
+        Loading report...
+
       </div>
 
-      <div class="empty-preview" *ngIf="!selectedReport">
-        <div class="empty-icon">📄</div>
-        <h3>Select a report to preview</h3>
-        <p>Generated reports will appear here for review before downloading</p>
-      </div>
 
-      <!-- The Actual Printable Preview Content -->
-      <div class="preview-content printable-area" *ngIf="selectedReport">
+      <!-- ============================== -->
+      <!-- Summary Report -->
+      <!-- ============================== -->
+
+      <div
+        class="reports-card"
+        *ngIf="
+          selectedReportType === 'Summary Report' &&
+          summaryReport
+        ">
+
         <div class="report-header">
-          <h1>{{ selectedReport.name }}</h1>
-          <p>Period: {{ selectedReport.period }} | Generated: {{ selectedReport.createdAt | date:'medium' }}</p>
+
+          <h1>Summary Report</h1>
+
+          <p>
+            Overall financial summary
+          </p>
+
         </div>
 
-        <!-- Specific Data Views based on Report Type -->
-      
-        <!-- Income / Expense / Cash Flow Data -->
-        <div class="report-data-grid" *ngIf="selectedReport.data.totalIncome !== undefined || selectedReport.data.totalExpense !== undefined">
-          <div class="data-box" *ngIf="selectedReport.data.totalIncome !== undefined">
+
+        <div class="report-data-grid">
+
+          <div class="data-box">
+
             <span>Total Income</span>
-            <strong>&#8377;{{ selectedReport.data.totalIncome | number:'1.2-2' }}</strong>
+
+            <strong>
+              ₹{{ summaryReport.totalIncome | number:'1.2-2' }}
+            </strong>
+
           </div>
-          <div class="data-box" *ngIf="selectedReport.data.totalExpense !== undefined">
+
+
+          <div class="data-box">
+
             <span>Total Expense</span>
-            <strong>&#8377;{{ selectedReport.data.totalExpense | number:'1.2-2' }}</strong>
-          </div>
-          <div class="data-box" *ngIf="selectedReport.data.netIncome !== undefined">
-            <span>Net Income</span>
-            <strong>&#8377;{{ selectedReport.data.netIncome | number:'1.2-2' }}</strong>
-          </div>
-          <div class="data-box" *ngIf="selectedReport.data.netCashFlow !== undefined">
-            <span>Net Cash Flow</span>
-            <strong>&#8377;{{ selectedReport.data.netCashFlow | number:'1.2-2' }}</strong>
-          </div>
-        </div>
 
-        <!-- Budget Report Data -->
-        <div class="report-data-grid" *ngIf="selectedReport.data.totalBudget !== undefined">
+            <strong>
+              ₹{{ summaryReport.totalExpense | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
           <div class="data-box">
+
+            <span>Balance</span>
+
+            <strong>
+              ₹{{ summaryReport.balance | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
             <span>Total Budget</span>
-            <strong>&#8377;{{ selectedReport.data.totalBudget | number:'1.2-2' }}</strong>
-          </div>
-          <div class="data-box">
-            <span>Actual Spending</span>
-            <strong>&#8377;{{ selectedReport.data.totalActual | number:'1.2-2' }}</strong>
-          </div>
-          <div class="data-box">
-            <span>Remaining Amount</span>
-            <strong>&#8377;{{ selectedReport.data.remainingAmount | number:'1.2-2' }}</strong>
-          </div>
-          <div class="data-box">
-            <span>Utilization</span>
-            <strong>{{ selectedReport.data.utilization | number:'1.0-2' }}%</strong>
-          </div>
-        </div>
 
-        <!-- Breakdown Tables -->
-        <div class="breakdown-section" *ngIf="selectedReport.data.expenseByCategory && objectKeys(selectedReport.data.expenseByCategory).length > 0">
-          <h3>Expense Breakdown</h3>
-          <table class="report-breakdown-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of objectKeys(selectedReport.data.expenseByCategory)">
-                <td>{{ cat }}</td>
-                <td>&#8377;{{ selectedReport.data.expenseByCategory[cat] | number:'1.2-2' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <strong>
+              ₹{{ summaryReport.totalBudget | number:'1.2-2' }}
+            </strong>
 
-        <div class="breakdown-section" *ngIf="selectedReport.data.incomeByCategory && objectKeys(selectedReport.data.incomeByCategory).length > 0">
-          <h3>Income Breakdown</h3>
-          <table class="report-breakdown-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of objectKeys(selectedReport.data.incomeByCategory)">
-                <td>{{ cat }}</td>
-                <td>&#8377;{{ selectedReport.data.incomeByCategory[cat] | number:'1.2-2' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          </div>
 
-        <!-- Budget Category Breakdown -->
-        <div class="breakdown-section" *ngIf="selectedReport.data.categories && objectKeys(selectedReport.data.categories).length > 0">
-          <h3>Category Budgets</h3>
-          <table class="report-breakdown-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Budget</th>
-                <th>Spent</th>
-                <th>Remaining</th>
-                <th>Utilization</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of objectKeys(selectedReport.data.categories)">
-                <td>{{ cat }}</td>
-                <td>&#8377;{{ selectedReport.data.categories[cat].budgetAmount | number:'1.2-2' }}</td>
-                <td>&#8377;{{ selectedReport.data.categories[cat].actualSpending | number:'1.2-2' }}</td>
-                <td>&#8377;{{ selectedReport.data.categories[cat].remaining | number:'1.2-2' }}</td>
-                <td>{{ selectedReport.data.categories[cat].utilization | number:'1.0-2' }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      
-        <!-- Tax Summary -->
-        <div class="breakdown-section" *ngIf="selectedReport.data.taxEstimates">
-          <h3>Tax Estimates Generated</h3>
-          <table class="report-breakdown-table">
-            <thead>
-              <tr>
-                <th>Country</th>
-                <th>Taxable Income</th>
-                <th>Estimated Annual Tax</th>
-                <th>Estimated Quarterly Tax</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let tax of selectedReport.data.taxEstimates">
-                <td>{{ tax.country }} ({{ tax.taxYear }})</td>
-                <td>&#8377;{{ tax.taxableIncome | number:'1.2-2' }}</td>
-                <td>&#8377;{{ tax.estimatedAnnualTax | number:'1.2-2' }}</td>
-                <td>&#8377;{{ tax.estimatedQuarterlyTax | number:'1.2-2' }}</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <div class="data-box">
+
+            <span>Estimated Tax</span>
+
+            <strong>
+              ₹{{ summaryReport.estimatedTax | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
         </div>
 
       </div>
+
+
+      <!-- ============================== -->
+      <!-- Monthly Report -->
+      <!-- ============================== -->
+
+      <div
+        class="reports-card"
+        *ngIf="
+          selectedReportType === 'Monthly Report' &&
+          monthlyReport
+        ">
+
+        <div class="report-header">
+
+          <h1>Monthly Report</h1>
+
+          <p>
+            {{ months[monthlyReport.month - 1]?.name }}
+            {{ monthlyReport.year }}
+          </p>
+
+        </div>
+
+
+        <div class="report-data-grid">
+
+          <div class="data-box">
+
+            <span>Total Income</span>
+
+            <strong>
+              ₹{{ monthlyReport.totalIncome | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>Total Expense</span>
+
+            <strong>
+              ₹{{ monthlyReport.totalExpense | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>Balance</span>
+
+            <strong>
+              ₹{{ monthlyReport.balance | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>Transactions</span>
+
+            <strong>
+              {{ monthlyReport.transactionCount }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Expense Breakdown -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            monthlyReport.expenseByCategory &&
+            objectKeys(monthlyReport.expenseByCategory).length > 0
+          ">
+
+          <h3>
+            Expense Breakdown
+          </h3>
+
+          <table class="report-breakdown-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Category
+                </th>
+
+                <th>
+                  Amount
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let category of objectKeys(
+                    monthlyReport.expenseByCategory
+                  )
+                ">
+
+                <td>
+                  {{ category }}
+                </td>
+
+                <td>
+                  ₹{{
+                    monthlyReport.expenseByCategory[category]
+                    | number:'1.2-2'
+                  }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- Income Breakdown -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            monthlyReport.incomeByCategory &&
+            objectKeys(monthlyReport.incomeByCategory).length > 0
+          ">
+
+          <h3>
+            Income Breakdown
+          </h3>
+
+          <table class="report-breakdown-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Category
+                </th>
+
+                <th>
+                  Amount
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let category of objectKeys(
+                    monthlyReport.incomeByCategory
+                  )
+                ">
+
+                <td>
+                  {{ category }}
+                </td>
+
+                <td>
+                  ₹{{
+                    monthlyReport.incomeByCategory[category]
+                    | number:'1.2-2'
+                  }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- Transactions -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            monthlyReport.transactions &&
+            monthlyReport.transactions.length > 0
+          ">
+
+          <h3>
+            Transactions
+          </h3>
+
+          <div class="table-wrapper">
+
+            <table class="report-breakdown-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Type
+                  </th>
+
+                  <th>
+                    Category
+                  </th>
+
+                  <th>
+                    Amount
+                  </th>
+
+                  <th>
+                    Date
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let transaction of monthlyReport.transactions
+                  ">
+
+                  <td>
+                    {{ transaction.type }}
+                  </td>
+
+                  <td>
+                    {{ transaction.category }}
+                  </td>
+
+                  <td>
+                    ₹{{ transaction.amount | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    {{ transaction.date | date:'mediumDate' }}
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ============================== -->
+      <!-- Quarterly Report -->
+      <!-- ============================== -->
+
+      <div
+        class="reports-card"
+        *ngIf="
+          selectedReportType === 'Quarterly Report' &&
+          monthlyReport
+        ">
+
+        <div class="report-header">
+
+          <h1>
+            Quarterly Report
+          </h1>
+
+          <p>
+            Q{{ monthlyReport.quarter }}
+            {{ monthlyReport.year }}
+          </p>
+
+        </div>
+
+
+        <div class="report-data-grid">
+
+          <div class="data-box">
+
+            <span>
+              Total Income
+            </span>
+
+            <strong>
+              ₹{{ monthlyReport.totalIncome | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>
+              Total Expense
+            </span>
+
+            <strong>
+              ₹{{ monthlyReport.totalExpense | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>
+              Balance
+            </span>
+
+            <strong>
+              ₹{{ monthlyReport.balance | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="data-box">
+
+            <span>
+              Transactions
+            </span>
+
+            <strong>
+              {{ monthlyReport.transactionCount }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Quarterly Expense Breakdown -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            monthlyReport.expenseByCategory &&
+            objectKeys(monthlyReport.expenseByCategory).length > 0
+          ">
+
+          <h3>
+            Quarterly Expense Breakdown
+          </h3>
+
+          <table class="report-breakdown-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Category
+                </th>
+
+                <th>
+                  Amount
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let category of objectKeys(
+                    monthlyReport.expenseByCategory
+                  )
+                ">
+
+                <td>
+                  {{ category }}
+                </td>
+
+                <td>
+                  ₹{{
+                    monthlyReport.expenseByCategory[category]
+                    | number:'1.2-2'
+                  }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- Quarterly Income Breakdown -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            monthlyReport.incomeByCategory &&
+            objectKeys(monthlyReport.incomeByCategory).length > 0
+          ">
+
+          <h3>
+            Quarterly Income Breakdown
+          </h3>
+
+          <table class="report-breakdown-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Category
+                </th>
+
+                <th>
+                  Amount
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let category of objectKeys(
+                    monthlyReport.incomeByCategory
+                  )
+                ">
+
+                <td>
+                  {{ category }}
+                </td>
+
+                <td>
+                  ₹{{
+                    monthlyReport.incomeByCategory[category]
+                    | number:'1.2-2'
+                  }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- Monthly Breakdown -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="monthlyReport.monthlyReports">
+
+          <h3>
+            Monthly Breakdown
+          </h3>
+
+          <div class="table-wrapper">
+
+            <table class="report-breakdown-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Month
+                  </th>
+
+                  <th>
+                    Income
+                  </th>
+
+                  <th>
+                    Expense
+                  </th>
+
+                  <th>
+                    Balance
+                  </th>
+
+                  <th>
+                    Transactions
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let report of monthlyReport.monthlyReports;
+                    let index = index
+                  ">
+
+                  <td>
+                    {{
+                      months[
+                        ((monthlyReport.quarter - 1) * 3) + index
+                      ]?.name
+                    }}
+                  </td>
+
+                  <td>
+                    ₹{{ report?.totalIncome || 0 | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    ₹{{ report?.totalExpense || 0 | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    ₹{{ report?.balance || 0 | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    {{ report?.transactionCount || 0 }}
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ============================== -->
+      <!-- Tax Report -->
+      <!-- ============================== -->
+
+      <div
+        class="reports-card"
+        *ngIf="
+          selectedReportType === 'Tax Report' &&
+          taxReport
+        ">
+
+        <div class="report-header">
+
+          <h1>
+            Tax Report
+          </h1>
+
+          <p>
+            {{ taxReport.financialYear || taxReport.year }}
+          </p>
+
+        </div>
+
+
+        <div class="report-data-grid">
+
+          <div class="data-box">
+
+            <span>
+              Tax Estimates
+            </span>
+
+            <strong>
+              {{ taxReport.count || 0 }}
+            </strong>
+
+          </div>
+
+
+          <div
+            class="data-box"
+            *ngIf="taxReport.latestTax">
+
+            <span>
+              Latest Estimated Tax
+            </span>
+
+            <strong>
+              ₹{{
+                taxReport.latestTax.estimatedTax
+                | number:'1.2-2'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div
+            class="data-box"
+            *ngIf="taxReport.latestTax">
+
+            <span>
+              Taxable Income
+            </span>
+
+            <strong>
+              ₹{{
+                taxReport.latestTax.taxableIncome
+                | number:'1.2-2'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div
+            class="data-box"
+            *ngIf="taxReport.latestTax">
+
+            <span>
+              Effective Tax Rate
+            </span>
+
+            <strong>
+              {{
+                taxReport.latestTax.effectiveTaxRate
+                | number:'1.0-2'
+              }}%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- Tax Estimate History -->
+
+        <div
+          class="breakdown-section"
+          *ngIf="
+            taxReport.taxEstimates &&
+            taxReport.taxEstimates.length > 0
+          ">
+
+          <h3>
+            Tax Estimate History
+          </h3>
+
+          <div class="table-wrapper">
+
+            <table class="report-breakdown-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Country
+                  </th>
+
+                  <th>
+                    Region
+                  </th>
+
+                  <th>
+                    Tax Year
+                  </th>
+
+                  <th>
+                    Regime
+                  </th>
+
+                  <th>
+                    Taxable Income
+                  </th>
+
+                  <th>
+                    Estimated Tax
+                  </th>
+
+                  <th>
+                    Tax Rate
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let tax of taxReport.taxEstimates
+                  ">
+
+                  <td>
+                    {{ tax.country }}
+                  </td>
+
+                  <td>
+                    {{ tax.region }}
+                  </td>
+
+                  <td>
+                    {{ tax.taxYear }}
+                  </td>
+
+                  <td>
+                    {{ tax.taxRegime }}
+                  </td>
+
+                  <td>
+                    ₹{{
+                      tax.taxableIncome
+                      | number:'1.2-2'
+                    }}
+                  </td>
+
+                  <td>
+                    ₹{{
+                      tax.estimatedTax
+                      | number:'1.2-2'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      tax.effectiveTaxRate
+                      | number:'1.0-2'
+                    }}%
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <!-- No Tax Estimates -->
+
+        <div
+          class="empty-state"
+          *ngIf="
+            !taxReport.taxEstimates ||
+            taxReport.taxEstimates.length === 0
+          ">
+
+          <p>
+            No tax estimates found for the selected financial year.
+          </p>
+
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>
